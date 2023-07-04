@@ -2,6 +2,7 @@ package com.pblgllgs.usersapp.models.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
@@ -15,10 +16,10 @@ public class User {
 
     @Column(unique = true)
     @Size(min = 4, max = 8)
-    @NotEmpty
+    @NotBlank
     private String username;
 
-    @NotEmpty
+    @NotBlank
     private String password;
 
     @NotEmpty
