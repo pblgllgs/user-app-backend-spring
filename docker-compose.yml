@@ -1,0 +1,18 @@
+version: '3'
+services:
+  mysql:
+    container_name: users_mysql_db
+    image: mysql:8.0.32
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_ROOT_USERNAME: root
+      MYSQL_DATABASE: db_users_springboot
+    ports:
+      - "3306:3306"
+    volumes:
+      - users_mysql_db:/var/lib/mysql
+volumes:
+  users_mysql_db:
+    external: false
