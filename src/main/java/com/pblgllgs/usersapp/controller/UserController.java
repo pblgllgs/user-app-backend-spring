@@ -1,5 +1,6 @@
 package com.pblgllgs.usersapp.controller;
 
+import com.pblgllgs.usersapp.models.request.UserRequest;
 import com.pblgllgs.usersapp.models.entities.User;
 import com.pblgllgs.usersapp.services.UserService;
 import jakarta.validation.Valid;
@@ -48,7 +49,7 @@ public class UserController {
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@Valid @PathVariable("id") Long id, BindingResult result, @RequestBody User user) {
+    public ResponseEntity<?> update(@Valid @RequestBody UserRequest user, BindingResult result, @PathVariable("id") Long id) {
         if(result.hasErrors()){
             return validation(result);
         }

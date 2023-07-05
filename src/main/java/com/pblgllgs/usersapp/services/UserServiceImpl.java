@@ -1,5 +1,6 @@
 package com.pblgllgs.usersapp.services;
 
+import com.pblgllgs.usersapp.models.request.UserRequest;
 import com.pblgllgs.usersapp.models.entities.User;
 import com.pblgllgs.usersapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public Optional<User> update(User user, Long id) {
+    public Optional<User> update(UserRequest user, Long id) {
         Optional<User> o = this.findById(id);
         if (o.isPresent()){
             User userDb = o.orElseThrow();
