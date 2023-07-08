@@ -1,6 +1,10 @@
 package com.pblgllgs.usersapp.auth.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pblgllgs.usersapp.auth.SimpleGrantedAuthorityJsonCreator;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,20 +34,29 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
             return;
         }
         String token = header.replace(PREFIX_TOKEN, "");
-        byte[] tokenDecodeBytes = Base64.getDecoder().decode(token);
-        String tokenDecode = new String(tokenDecodeBytes);
-        String[] tokenArray = tokenDecode.split(":");
-        String secret = tokenArray[0];
-        String username = tokenArray[1];
-        if (SECRET_KEY.equals(secret)) {
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            Object authoritiesClaims = claims.get("authorities");
+            String username = claims.getSubject();
+            Collection<? extends GrantedAuthority> authorities =
+                    Arrays.asList(
+                            new ObjectMapper()
+                                    .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
+                                    .readValue(
+                                            authoritiesClaims.toString()
+                                                    .getBytes(), SimpleGrantedAuthority[].class));
+
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(username, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             chain.doFilter(request, response);
-        } else {
+        } catch (JwtException e) {
             Map<String, String> body = new HashMap<>();
+            body.put("error", e.getMessage());
             body.put("message", "El token no es válido");
             response.getWriter().write(new ObjectMapper().writeValueAsString(body));
             response.setStatus(403);

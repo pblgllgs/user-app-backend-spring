@@ -1,5 +1,6 @@
 package com.pblgllgs.usersapp.controller;
 
+import com.pblgllgs.usersapp.models.dto.UserDto;
 import com.pblgllgs.usersapp.models.request.UserRequest;
 import com.pblgllgs.usersapp.models.entities.User;
 import com.pblgllgs.usersapp.services.UserService;
@@ -26,13 +27,13 @@ public class UserController {
     }
 
     @GetMapping()
-    public List<User> findAll() {
+    public List<UserDto> findAll() {
         return userService.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable("id") Long id) {
-        Optional<User> userOptional = userService.findById(id);
+        Optional<UserDto> userOptional = userService.findById(id);
         if (userOptional.isPresent()) {
             return ResponseEntity.ok(userOptional.orElseThrow());
         }
@@ -53,7 +54,7 @@ public class UserController {
         if(result.hasErrors()){
             return validation(result);
         }
-        Optional<User> o = userService.update(user, id);
+        Optional<UserDto> o = userService.update(user, id);
         if (o.isPresent()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(o.orElseThrow());
         }
@@ -62,7 +63,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> remove(@PathVariable("id") Long id) {
-        Optional<User> o = userService.findById(id);
+        Optional<UserDto> o = userService.findById(id);
         if (o.isPresent()) {
             userService.remove(id);
             return ResponseEntity.noContent().build();

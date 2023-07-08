@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class JpaUserDetailsService implements UserDetailsService {
@@ -28,13 +29,16 @@ public class JpaUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<com.pblgllgs.usersapp.models.entities.User> o = userRepository.getUserByUsername(username);
 
-        if (o.isEmpty()){
-            throw new UsernameNotFoundException(String.format("El usuario %s no existe",username));
+        if (o.isEmpty()) {
+            throw new UsernameNotFoundException(String.format("El usuario %s no existe", username));
         }
         com.pblgllgs.usersapp.models.entities.User user = o.orElseThrow();
 
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        List<GrantedAuthority> authorities =
+                user.getRoles()
+                        .stream()
+                        .map(r -> new SimpleGrantedAuthority(r.getName()))
+                        .collect(Collectors.toList());
 
         return new User(
                 user.getUsername(),
