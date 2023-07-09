@@ -1,5 +1,6 @@
 package com.pblgllgs.usersapp.services;
 
+import com.pblgllgs.usersapp.models.IUser;
 import com.pblgllgs.usersapp.models.dto.UserDto;
 import com.pblgllgs.usersapp.models.dto.mapper.DtoMapperUser;
 import com.pblgllgs.usersapp.models.entities.Role;
@@ -49,12 +50,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        List<Role> roles = new ArrayList<>();
-        Optional<Role> o = roleRepository.findByName("ROLE_USER");
-        if (o.isPresent()) {
-            roles.add(o.orElseThrow());
-        }
-        user.setRoles(roles);
+        user.setRoles(getRoles(user));
         return DtoMapperUser.builder().setUser(userRepository.save(user)).build();
     }
 
@@ -65,6 +61,7 @@ public class UserServiceImpl implements UserService {
         User userOptional = null;
         if (o.isPresent()) {
             User userDb = o.orElseThrow();
+            userDb.setRoles(getRoles(user));
             userDb.setUsername(user.getUsername());
             userDb.setEmail(user.getEmail());
             userOptional = userRepository.save(userDb);
@@ -76,5 +73,20 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void remove(Long id) {
         userRepository.deleteById(id);
+    }
+
+    public List<Role> getRoles(IUser user){
+        Optional<Role> ou = roleRepository.findByName("ROLE_USER");
+        List<Role> roles = new ArrayList<>();
+        if (ou.isPresent()) {
+            roles.add(ou.orElseThrow());
+        }
+        if (user.isAdmin()){
+            Optional<Role> oa = roleRepository.findByName("ROLE_ADMIN");
+            if (oa.isPresent()) {
+                roles.add(oa.orElseThrow());
+            }
+        }
+        return roles;
     }
 }
