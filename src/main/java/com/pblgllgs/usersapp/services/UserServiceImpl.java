@@ -8,6 +8,8 @@ import com.pblgllgs.usersapp.models.request.UserRequest;
 import com.pblgllgs.usersapp.models.entities.User;
 import com.pblgllgs.usersapp.repository.RoleRepository;
 import com.pblgllgs.usersapp.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,13 +77,19 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
-    public List<Role> getRoles(IUser user){
+    @Override
+    @Transactional(readOnly = true)
+    public Page<UserDto> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable).map(u -> DtoMapperUser.builder().setUser(u).build());
+    }
+
+    public List<Role> getRoles(IUser user) {
         Optional<Role> ou = roleRepository.findByName("ROLE_USER");
         List<Role> roles = new ArrayList<>();
         if (ou.isPresent()) {
             roles.add(ou.orElseThrow());
         }
-        if (user.isAdmin()){
+        if (user.isAdmin()) {
             Optional<Role> oa = roleRepository.findByName("ROLE_ADMIN");
             if (oa.isPresent()) {
                 roles.add(oa.orElseThrow());

@@ -5,6 +5,9 @@ import com.pblgllgs.usersapp.models.request.UserRequest;
 import com.pblgllgs.usersapp.models.entities.User;
 import com.pblgllgs.usersapp.services.UserService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -29,6 +32,12 @@ public class UserController {
     @GetMapping()
     public List<UserDto> findAll() {
         return userService.findAll();
+    }
+
+    @GetMapping("/page/{page}")
+    public Page<UserDto> list(@PathVariable("page") Integer page) {
+        Pageable pageable = PageRequest.of(page, 4);
+        return userService.findAll(pageable);
     }
 
     @GetMapping("/{id}")
